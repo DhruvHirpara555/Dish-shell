@@ -2,26 +2,63 @@
 #include "headers.h"
 #include "inputs.h"
 #include "execute.h"
+#include "process.h"
+#include "signalhandling.h"
+#include "history.h"
+
+time_t last_time = 0;
 
 int main()
 {
+
     init_shell();
+    init_process_list();
+    init_history();
+    signal(SIGINT, sigint_handler);
+    signal(SIGTSTP, sigtstop_handler);
+
+    signal(SIGCHLD,process_ch_handler);
+
     while (1)
     {
         prompt();
+        last_time = 0;
         char* line;
         line = get_input();
+        // printf("%s",line);
+        if (strcmp(line,"") == 0)
+        {
+            continue;
+        }
 
-        char* com = strtok(line, ";\n");
+
+        char* copy = (char*)malloc(strlen(line) + 1);
+        strcpy(copy, line);
+        char* paste = (char*)malloc(strlen(line) + 1);
+        strcpy(paste, line);
+        char* saveptr;
+        char* com = strtok_r(paste, ";&\n", &saveptr);
+        int i = strlen(com);
         while (com != NULL)
         {
+            int bp=0;
+            if(copy[i] == '&')
+            {
+                // printf("Background process %s\n", com);
+                bp = 1;
+
+            }
+            // else
+            // {
+            //     // execute(com, 0);
+            //     printf("Foreground process %s\n", com);
+            // }
 
             int argc = 0;
             char** argv = parse_input(com, &argc);
-            if (argc == 0)
+            if (argc > 0)
             {
-                com = strtok(NULL, ";\n");
-                continue;
+                execute(argc, argv, bp);
             }
             // printf("\n");
             // for (int i = 0; i < argc; i++)
@@ -29,8 +66,38 @@ int main()
             //     printf("%s ", argv[i]);
             // }
             // printf("\n");
-            execute(argc, argv);
-            com = strtok(NULL, ";\n");
+
+            for(int i=0;i<argc;i++)
+            {
+                if(argv[i] == NULL)
+                {
+                    continue;
+                }
+                free(argv[i]);
+            }
+            free(argv);
+
+            com = strtok_r(NULL, ";&\n", &saveptr);
+            if (com==NULL)
+            {
+                break;
+            }
+
+            i+=strlen(com)+1;
         }
+        free(copy);
+        free(paste);
+        write_history(line);
+
     }
 }
+
+/*
+comm1 ; comm2 ; comm3
+
+comm1 == cd       Downloads
+
+argc = 2
+argv[0] = cd
+argv[1] = Downloads
+*/

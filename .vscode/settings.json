@@ -1,0 +1,12 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/dhruv/OSNftw/Dish",
+            "binaryPath": "/home/dhruv/OSNftw/Dish/dish",
+            "binaryArgs": []
+        }
+    ],
+    "files.associations": {
+        "ratio": "c"
+    }
+}

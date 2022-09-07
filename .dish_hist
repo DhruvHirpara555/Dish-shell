@@ -1,0 +1,20 @@
+pinfo 3135
+pinfo 426277
+pinfo 521698
+pinfo 2474
+discover
+cd ..
+discover "q1.c"
+cd ..
+dicover "q1.c"
+discover "q1.c"
+history
+clear
+history
+discover -d
+discord &; sleep 4 & sleep 2
+sleep 3 & sleep 6&
+sleep 3&; sleep 4
+sleep 6& ; sleep 3
+sleep 6& ; sleep 4&
+discord & sleep 1&

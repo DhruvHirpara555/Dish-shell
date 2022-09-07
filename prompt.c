@@ -15,13 +15,13 @@ void init_shell()
 
     if (uname(&un) == -1)
     {
-        perror("uname");
+        perror(RED "uname" RESET);
         exit(1);
     }
     pw = getpwuid(uid);
     if (pw == NULL)
     {
-        perror("getpwuid");
+        perror(RED "getpwuid" RESET);
         exit(1);
     }
 
@@ -30,6 +30,8 @@ void init_shell()
     home_dir = (char*) malloc(sizeof(char) * strlen(cwd));
     strcpy(home_dir, cwd);
     home_len = strlen(home_dir);
+    char clear[] = "\e[1;1H\e[2J";
+    // write(STDOUT_FILENO,clear,strlen(clear));
     free(cwd);
 }
 
@@ -37,30 +39,49 @@ void init_shell()
 
 
 void prompt() {
-    static int toclear = 1;
-    if (toclear)
-    {
-        char clear[] = "\e[1;1H\e[2J";
-        write(STDOUT_FILENO,clear,strlen(clear));
-        toclear = 0;
-    }
+    // static int toclear = 1;
+    // if (toclear)
+    // {
+    //
+    //     toclear = 0;
+    // }
 
-    printf("%s@%s",pw->pw_name,un.nodename);
+    printf(CYAN "<%s@%s:" RESET,pw->pw_name,un.nodename);
 
     char *dir = getcwd(NULL, 0);
     unsigned int len = strlen(dir);
 
     if(len < home_len){
-        printf("%s>",dir);
+        printf(YELLOW "%s" RESET,dir);
+        // time taken greater than 2 seconds
+        if(last_time > 2){
+            printf(" %s",RED);
+            printf("took %d",last_time);
+            printf("s%s",RESET);
+        }
+        printf(">");
     }
     else{
         for(unsigned int i=0; i<home_len; i++){
             if(dir[i] != home_dir[i]){
-                printf("%s>",dir);
-                break;
+                printf(YELLOW "%s" RESET,dir);
+                free(dir);
+                if(last_time > 2){
+                    printf(" %s",RED);
+                    printf("took %d",last_time);
+                    printf("s%s",RESET);
+                    printf(">");
+                }
+                return;
             }
         }
-        printf("~%s>",dir+home_len);
+        printf(YELLOW "~%s" RESET,dir+home_len);
+        if(last_time > 2){
+            printf(" %s",RED);
+            printf("took %d",last_time);
+            printf("s%s",RESET);
+        }
+        printf(">");
     }
     free(dir);
 

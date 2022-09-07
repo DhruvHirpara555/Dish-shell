@@ -30,7 +30,7 @@ char** parse_input(char* command, int* argc)
 
     }
 
-    char **argv = (char**) malloc(sizeof(char*) * (*argc));
+    char **argv = (char**) malloc(sizeof(char*) * (*argc+1));
     last =-1;
     unsigned int carg = 0;
     for (long long int i = 0; i < len; i++)
@@ -48,6 +48,7 @@ char** parse_input(char* command, int* argc)
             }
         }
     }
+    argv[carg] = NULL;
     return argv;
 }
 
@@ -55,6 +56,7 @@ char** parse_input(char* command, int* argc)
 
 char* get_input(){
     char *line = NULL;
+
     unsigned long len = 0;
     len = getline(&line, &len, stdin);
     if(len > 0){
