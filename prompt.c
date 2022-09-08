@@ -54,7 +54,7 @@ void prompt() {
     if(len < home_len){
         printf(YELLOW "%s" RESET,dir);
         // time taken greater than 2 seconds
-        if(last_time > 2){
+        if(last_time >= 2){
             printf(" %s",RED);
             printf("took %d",last_time);
             printf("s%s",RESET);
@@ -66,7 +66,7 @@ void prompt() {
             if(dir[i] != home_dir[i]){
                 printf(YELLOW "%s" RESET,dir);
                 free(dir);
-                if(last_time > 2){
+                if(last_time >= 2){
                     printf(" %s",RED);
                     printf("took %d",last_time);
                     printf("s%s",RESET);
@@ -76,7 +76,7 @@ void prompt() {
             }
         }
         printf(YELLOW "~%s" RESET,dir+home_len);
-        if(last_time > 2){
+        if(last_time >= 2){
             printf(" %s",RED);
             printf("took %d",last_time);
             printf("s%s",RESET);

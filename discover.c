@@ -4,6 +4,8 @@
 #include <dirent.h>
 #include "prompt.h"
 
+
+
 void exec_discover(int argc,char* argv[])
 {
     char* target_dir = ".";
@@ -54,7 +56,7 @@ void exec_discover(int argc,char* argv[])
     }
     recurse_search(target_dir,file_name,flag_d,flag_f);
 
-
+    // free(target_dir);
     return;
 
 

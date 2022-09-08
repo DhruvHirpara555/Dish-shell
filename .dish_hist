@@ -1,20 +1,20 @@
-pinfo 3135
-pinfo 426277
-pinfo 521698
-pinfo 2474
-discover
+cd /home/dhruv
+cd -
 cd ..
-discover "q1.c"
-cd ..
-dicover "q1.c"
-discover "q1.c"
-history
+cd -
+cd
+cd ~
+ls
+sleep 4&
+sleep2
+slee 5&
+sleep 5&
+sleep 2
+s
+sleep 4
+sleep 5& sleep 3 ; sleep 2
+sleep 5;sleep 2
+pinfo
+pinfo 331234
 clear
-history
-discover -d
-discord &; sleep 4 & sleep 2
-sleep 3 & sleep 6&
-sleep 3&; sleep 4
-sleep 6& ; sleep 3
-sleep 6& ; sleep 4&
-discord & sleep 1&
+ls . ../Programs dish builtins.c

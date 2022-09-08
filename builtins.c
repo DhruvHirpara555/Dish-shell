@@ -5,6 +5,8 @@
 #include <dirent.h>
 #include <grp.h>
 #include <time.h>
+#include <ctype.h>
+
 char* lastused = NULL;
 // char* home_dir;
 void exec_cd(int argc, char *argv[])
@@ -52,6 +54,9 @@ void exec_cd(int argc, char *argv[])
     else{
         printf(RED "cd" RESET ": too many arguments\n");
     }
+    if(lastused != NULL){
+        free(lastused);
+    }
     lastused = strdup(cwd);
     free(cwd);
 }
@@ -61,6 +66,7 @@ void exec_pwd(int argc, char *argv[])
     if (argc != 1)
     {
         printf(RED"pwd" RESET ": too many arguments\n");
+        return;
     }
 
     char* cwd = getcwd(NULL, 0);
@@ -86,6 +92,34 @@ void exec_echo(int argc, char *argv[])
         write(STDOUT_FILENO," ",1);
     }
     write(STDOUT_FILENO,"\n",1);
+}
+
+
+int cmp_str(const void *a, const void *b)
+{
+    // return strcmp(*(char **)a, *(char **)b);
+    char *s1 = strdup(*(char **)a);
+    char *s2 = strdup(*(char **)b);
+    // compare the base name of the file
+    char *itr = strtok(s1, "/");
+    char *base1 = itr;
+    while (itr != NULL){
+        if(strlen(itr) > 0){
+            base1 = itr;
+        }
+        itr = strtok(NULL, "/");
+    }
+    char *itr2 = strtok(s2, "/");
+    char *base2 = itr2;
+    while (itr2 != NULL){
+        if(strlen(itr2) > 0){
+            base2 = itr2;
+        }
+        itr2 = strtok(NULL, "/");
+    }
+    free(s1);
+    free(s2);
+    return strcasecmp(base1, base2);
 }
 
 void exec_ls(int argc, char *argv[])
@@ -120,12 +154,22 @@ void exec_ls(int argc, char *argv[])
         path_count++;
     }
 
+    qsort(path_array, path_count, sizeof(char *), cmp_str);
+    // print all the files in the path_array
+    int path_done[path_count];
+    for(int i = 0;i< path_count;i++){
+        path_done[i] = lsutil_printfile(path_array[i],flag_a,flag_l);
+    }
+    // print all the directories in the path_array
     for (int  i = 0; i < path_count; i++)
     {
+        if(path_done[i]){
+            continue;
+        }
         if (path_count > 1){
             printf("%s:\n",path_array[i]);
         }
-        lsutil_print(path_array[i],flag_a,flag_l);
+        lsutil_printdir(path_array[i],flag_a,flag_l);
 
     }
     free(path_array);
@@ -160,12 +204,28 @@ char* permi_file(struct stat file_stat)
     return permi;
 }
 
-
-
-void lsutil_print(char *path, int flag_a, int flag_l)
+int cmpfunc (const void * a, const void * b)
+{
+//    return ( strcmp(*(char **)a, *(char **)b) );
+    struct dirent *dir1 = *(struct dirent **)a;
+    struct dirent *dir2 = *(struct dirent **)b;
+    char *str_dir1 = dir1->d_name;
+    char *str_dir2 = dir2->d_name;
+    if(str_dir1[0] == '.'){
+        str_dir1++;
+    }
+    if(str_dir2[0] == '.'){
+        str_dir2++;
+    }
+    return strcasecmp(str_dir1, str_dir2);
+    // return ( strcmp(str_dir1, str_dir2) );
+    // return ( strcmp(dir1->d_name, dir2->d_name) );
+}
+int lsutil_printfile(char *path, int flag_a,int flag_l)
 {
     char* cwd = getcwd(NULL, 0);
     char* newpath = (char *) malloc(sizeof(char) * (strlen(path) + home_len));
+
     if (path[0] == '~' && (path[1] == '\0' || path[1] == '/')){
         strcpy(newpath, home_dir);
         sprintf(newpath, "%s%s", newpath, path+1);
@@ -178,18 +238,16 @@ void lsutil_print(char *path, int flag_a, int flag_l)
     struct stat st;
     if (stat(newpath, &st) == -1){
         perror(RED "stat" RESET);
-        return;
+        return 0;
         // exit(1);
     }
-
-    // DIR *dir = opendir(path);
     if(!S_ISDIR(st.st_mode)){
-        struct stat st;
-        if (stat(newpath, &st) == -1){
-            perror(RED "stat" RESET);
-            // exit(1);
-            return;
-        }
+        // struct stat st;
+        // if (stat(newpath, &st) == -1){
+        //     perror(RED "stat" RESET);
+        //     // exit(1);
+        //     return 1;
+        // }
 
         char* duplicate = strdup(newpath);
 
@@ -221,22 +279,91 @@ void lsutil_print(char *path, int flag_a, int flag_l)
         printf("\n\n");
 
         free(duplicate);
+        free(newpath);
+        free(cwd);
+        return 1;
+    }
+    free(newpath);
+    free(cwd);
+    return 0;
+
+}
+
+void lsutil_printdir(char *path, int flag_a, int flag_l)
+{
+    char* cwd = getcwd(NULL, 0);
+    char* newpath = (char *) malloc(sizeof(char) * (strlen(path) + home_len));
+    if (path[0] == '~' && (path[1] == '\0' || path[1] == '/')){
+        strcpy(newpath, home_dir);
+        sprintf(newpath, "%s%s", newpath, path+1);
+
+        // path = newpath;
+    }
+    else{
+        strcpy(newpath, path);
+    }
+    struct stat st;
+    if (stat(newpath, &st) == -1){
+        perror(RED "stat" RESET);
+        return;
+        // exit(1);
+    }
+
+    // DIR *dir = opendir(path);
+    if(!S_ISDIR(st.st_mode)){
+
+        free(newpath);
+        free(cwd);
         return;
     }
 
     struct dirent **namelist;
-    int n;
-    if (flag_a == 1){
-        n = scandir(newpath, &namelist, NULL, alphasort);
-    }
-    else{
-        n = scandir(newpath, &namelist, filter_hidden, alphasort);
-    }
-    if (n == -1){
-        perror(RED "ls" RESET);
-        // exit(1);
+    struct dirent *dir;
+    DIR *d;
+    int n = 0;
+    d = opendir(newpath);
+    if (d == NULL){
+        perror(RED "opendir" RESET);
         return;
+        // exit(1);
     }
+    while ((dir = readdir(d)) != NULL){
+        if(flag_a == 0 && dir->d_name[0] == '.'){
+            continue;
+        }
+        n++;
+    }
+    closedir(d);
+    namelist = (struct dirent **) malloc(sizeof(struct dirent *) * n);
+    d = opendir(newpath);
+    if (d == NULL){
+        perror(RED "opendir" RESET);
+        return;
+        // exit(1);
+    }
+    int i = 0;
+    while ((dir = readdir(d)) != NULL){
+        if(flag_a == 0 && dir->d_name[0] == '.'){
+            continue;
+        }
+        namelist[i] = dir;
+        i++;
+    }
+
+
+    qsort(namelist, n, sizeof(struct dirent *), cmpfunc);
+
+    // if (flag_a == 1){
+    //     n = scandir(newpath, &namelist, NULL, alphasort);
+    // }
+    // else{
+    //     n = scandir(newpath, &namelist, filter_hidden, alphasort);
+    // }
+    // if (n == -1){
+    //     perror(RED "ls" RESET);
+    //     // exit(1);
+    //     return;
+    // }
 
     if(flag_l == 1){
         for(int i = 0; i < n; i++){
@@ -301,6 +428,8 @@ void lsutil_print(char *path, int flag_a, int flag_l)
         printf("\n");
     }
     free(newpath);
+    closedir(d);
+    free(namelist);
 
 
 

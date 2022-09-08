@@ -4,7 +4,7 @@
 char** parse_input(char* command, int* argc)
 {
     unsigned int len = strlen(command);
-    char* comm = (char*) malloc(sizeof(char) * len);
+    char* comm = (char*) malloc(sizeof(char) * (len+1));
     strcpy(comm, command);
     unsigned int j = 0;
 
@@ -49,6 +49,7 @@ char** parse_input(char* command, int* argc)
         }
     }
     argv[carg] = NULL;
+    free(comm);
     return argv;
 }
 
