@@ -1,20 +1,20 @@
-cd /home/dhruv
-cd -
-cd ..
-cd -
-cd
-cd ~
+echo hi.txt | grep *txt
 ls
-sleep 4&
-sleep2
-slee 5&
-sleep 5&
-sleep 2
-s
-sleep 4
-sleep 5& sleep 3 ; sleep 2
-sleep 5;sleep 2
-pinfo
-pinfo 331234
+cat .dish_dist | echo
+cat .dish_hist | echo
+cat .dish_hist | grep cs
+cat .dish_hist | grep cd
+cat .dish_hist | grep dis
+cat .dish_hist | grep *.txt
+cat .dish_hist | grep ls
+cat .dish_hist | grep ls > out.txt
+ cat < .dish_hist | wc -l > lines.txt
+ cat < .dish_hist | wc 
+ cat < .dish_hist | wc -l
+history
 clear
-ls . ../Programs dish builtins.c
+cat < *.txt | wc
+cat < *.c | ex
+cat < *.c | wc
+cat < headers.h | wc
+exity

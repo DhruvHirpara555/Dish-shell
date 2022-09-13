@@ -5,9 +5,10 @@
 #include "process.h"
 #include "signalhandling.h"
 #include "history.h"
-
+#include "exe.h"
 time_t last_time = 0;
-
+int ORIG_STDIN;
+int ORIG_STDOUT;
 int main()
 {
 
@@ -19,12 +20,25 @@ int main()
 
     signal(SIGCHLD,process_ch_handler);
 
+    ORIG_STDIN = dup(STDIN_FILENO);
+    if(ORIG_STDIN < 0)
+    {
+        perror(RED "dup" RESET);
+        exit(1);
+    }
+    ORIG_STDOUT = dup(STDOUT_FILENO);
+    if(ORIG_STDOUT < 0)
+    {
+        perror(RED "dup" RESET);
+        exit(1);
+    }
+
     while (1)
     {
         prompt();
         last_time = 0;
         char* line;
-        line = get_input();
+        line = rawinput();
         // printf("%s",line);
         if (strcmp(line,"") == 0)
         {
@@ -58,7 +72,7 @@ int main()
             char** argv = parse_input(com, &argc);
             if (argc > 0)
             {
-                execute(argc, argv, bp);
+                exe_redi_pip(argc, argv, bp);
             }
             // printf("\n");
             // for (int i = 0; i < argc; i++)

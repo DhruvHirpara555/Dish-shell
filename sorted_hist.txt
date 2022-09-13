@@ -1,0 +1,20 @@
+cd
+dfsd
+discover .
+discover -d ../. "a.out"
+discover -d ../. "Dish"
+discover -f ../. "a.out"
+echo "hello" > output.txt
+eixt
+ggsd
+history
+history
+history]
+history 4
+man 3 printf
+man wait
+sleep 1
+sleep 1; sleep 3 
+sleep 2&
+sleep 2&;sleep 3
+sleep 4
